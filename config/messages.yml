@@ -1,0 +1,54 @@
+Embeds:
+  GiveawayCreated:
+    title: "🎁 Giveaway"
+    description: "{description}"
+    color: "Aqua"
+    fields:
+      - name: "Prize"
+        value: "{prize}"
+        inline: true
+      - name: "⠀"
+        value: "⠀"
+        inline: true
+      - name: "Winners"
+        value: "{winners}"
+        inline: true
+      - name: "Hosted By"
+        value: "<@{hostedBy}>"
+        inline: true
+      - name: "⠀"
+        value: "⠀"
+        inline: true
+      - name: "Giveaway Ends"
+        value: "<t:{timestamp}:R>"
+        inline: true
+      - name: "⠀"
+        value: "**Use the button below to participate in the giveaway!**"
+  GiveawayEnded:
+    title: "🎁 Giveaway Ended"
+    description: "{description}"
+    color: "DarkAqua"
+    fields:
+      - name: "Prize"
+        value: "{prize}"
+        inline: true
+      - name: "⠀"
+        value: "⠀"
+        inline: true
+      - name: "Winners"
+        value: "{winners}"
+        inline: true
+      - name: "Hosted By"
+        value: "<@{hostedBy}>"
+        inline: true
+      - name: "⠀"
+        value: "⠀"
+        inline: true
+      - name: "Giveaway Ends"
+        value: "Ended."
+        inline: true
+      - name: "⠀"
+        value: "**Thank you for participating in the giveaway**"
+
+Strings:
+  GiveawayWinnerMessage: "Congratulations, {winners}, you won **{prize}**!"
