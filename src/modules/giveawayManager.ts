@@ -1,16 +1,9 @@
+import { type TextChannel, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import type { Giveaway } from "@/db/entity/Giveaway";
 import { TypedEmitter } from "tiny-typed-emitter";
+import replaceAll from "@/utils/replaceAll";
 import type Bot from "@/structures/Client";
 import ms from "ms";
-
-import {
-	type TextChannel,
-	type GuildMember,
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-} from "discord.js";
-import replaceAll from "@/utils/replaceAll";
 
 interface GiveawayEvents {
 	giveawayEnded: (giveaway: Giveaway) => void;
@@ -87,29 +80,29 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 	 * @returns A parsed payload for the message
 	 */
 	generateMessagePayload(giveaway: Giveaway | CreateGiveaway) {
+		const embedKey = giveaway.ended ? "GiveawayEnded" : "GiveawayCreated";
+		const buttonKey = giveaway.ended
+			? "GiveawayEndedButton"
+			: "GiveawayActiveButton";
+
 		return {
 			embeds: [
-				replaceAll(
-					giveaway.ended
-						? this.client.messages.Embeds.GiveawayEnded
-						: this.client.messages.Embeds.GiveawayCreated,
-					{
-						"{prize}": giveaway.prize,
-						"{description}": giveaway.description,
-						"{winners}": giveaway.winners
-							? giveaway.winners.map((w) => `<@${w}>`).join(", ")
-							: giveaway.winnerCount,
-						"{hostedBy}": giveaway.hostedBy,
-						"{timestamp}": Math.floor(giveaway.endDate.getTime() / 1000),
-					},
-				),
+				replaceAll(this.client.messages.Embeds[embedKey], {
+					"{prize}": giveaway.prize,
+					"{description}": giveaway.description,
+					"{winners}": giveaway.winners
+						? giveaway.winners.map((w) => `<@${w}>`).join(", ")
+						: giveaway.winnerCount,
+					"{hostedBy}": giveaway.hostedBy,
+					"{timestamp}": Math.floor(giveaway.endDate.getTime() / 1000),
+				}),
 			],
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
-						.setLabel("Join")
-						.setEmoji("🎉")
-						.setStyle(ButtonStyle.Success)
+						.setLabel(this.client.messages.Buttons[buttonKey]?.Label)
+						.setStyle(this.client.messages.Buttons[buttonKey]?.Style)
+						.setEmoji(this.client.messages.Buttons[buttonKey]?.Emoji)
 						.setDisabled(giveaway?.ended ?? false)
 						.setCustomId("join-giveaway"),
 				),
@@ -196,10 +189,8 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 			}
 
 			if (giveaway.endDate < new Date()) {
-				const giveawayWinners = this.getWinnersForGiveaway(giveaway);
-
+				giveaway.winners = this.getWinnersForGiveaway(giveaway);
 				giveaway.ended = true;
-				giveaway.winners = giveawayWinners.map((w) => w.id);
 
 				await this.client.db.giveaways.save(giveaway);
 				this.emit("giveawayEnded", giveaway);
@@ -212,20 +203,18 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 	 * @param giveaway - The giveaway to get the winners of
 	 * @returns The winners of the giveaway
 	 */
-	private getWinnersForGiveaway(giveaway: Giveaway) {
-		const winners: Array<GuildMember> = [];
+	private getWinnersForGiveaway(giveaway: Giveaway): Array<string> {
+		const winners: Array<string> = [];
+		const entryCount = giveaway.entries.length;
+		const winnerCount = Math.min(giveaway.winnerCount, entryCount);
 
-		for (let i = 0; i < giveaway.winnerCount; i++) {
-			const winner =
-				giveaway.entries[Math.floor(Math.random() * giveaway.entries.length)];
+		for (let i = 0; i < winnerCount; i++) {
+			let winner: string;
+			do {
+				winner = giveaway.entries[Math.floor(Math.random() * entryCount)];
+			} while (!winner || winners.includes(winner));
 
-			if (!winner) continue;
-
-			winners.push(
-				this.client.guilds.cache
-					.get(giveaway.guildId)
-					?.members.cache.get(winner) as GuildMember,
-			);
+			winners.push(winner);
 		}
 
 		return winners;

@@ -49,6 +49,19 @@ Embeds:
         inline: true
       - name: "⠀"
         value: "**Thank you for participating in the giveaway**"
+  GiveawayEntryRegistered:
+    title: "🎁 Your entry to this giveaway has been successfully registered"
+    color: "Green"
+
+Buttons:
+  GiveawayActiveButton:
+    Label: "Participate"
+    Style: "Primary"
+    Emoji: "🎉"
+  GiveawayEndedButton:
+    Label: "Ended"
+    Style: "Secondary"
+    Emoji: "🎉"
 
 Strings:
   GiveawayWinnerMessage: "Congratulations, {winners}, you won **{prize}**!"

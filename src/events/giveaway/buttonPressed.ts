@@ -1,5 +1,6 @@
+import replaceAll from "@/utils/replaceAll";
 import { Event } from "@/structures/Event";
-import { EmbedBuilder, Events } from "discord.js";
+import { Events } from "discord.js";
 import bot from "@/index";
 
 export default new Event(Events.InteractionCreate, async (interaction) => {
@@ -24,11 +25,7 @@ export default new Event(Events.InteractionCreate, async (interaction) => {
 	);
 
 	await interaction.reply({
-		embeds: [
-			new EmbedBuilder()
-				.setTitle("🎉 You have entered the giveaway!")
-				.setColor("Green"),
-		],
+		embeds: [replaceAll(bot.messages.Embeds.GiveawayEntryRegistered)],
 		ephemeral: true,
 	});
 });
