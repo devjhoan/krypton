@@ -1,5 +1,11 @@
 {
 	"conventionalCommits.scopes": [
-		"git"
+		"git",
+		"client",
+		"server",
+		"commands",
+		"events",
+		"modules",
+		"config"
 	]
 }
