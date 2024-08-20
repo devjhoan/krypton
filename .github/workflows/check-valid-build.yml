@@ -1,0 +1,21 @@
+name: "Validate if build is valid"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  check-valid-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install
+        name: "Install bun"
+
+      - run: bun run lint
+        name: "Lint project"
