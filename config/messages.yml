@@ -2,7 +2,7 @@ Embeds:
   GiveawayCreated:
     title: "🎁 Giveaway"
     description: "{description}"
-    color: "Aqua"
+    color: "{color-default}"
     fields:
       - name: "Prize"
         value: "{prize}"
@@ -27,7 +27,7 @@ Embeds:
   GiveawayEnded:
     title: "🎁 Giveaway Ended"
     description: "{description}"
-    color: "DarkAqua"
+    color: "{color-default}"
     fields:
       - name: "Prize"
         value: "{prize}"
@@ -52,6 +52,13 @@ Embeds:
   GiveawayEntryRegistered:
     title: "🎁 Your entry to this giveaway has been successfully registered"
     color: "Green"
+  UserMessagesEmbed:
+    title: "{user-username}"
+    description: "You sent a total of **{messages}** messages in this server."
+    color: "{color-default}"
+    footer:
+      text: "{bot-username}"
+      iconURL: "{bot-avatar}"
 
 Buttons:
   GiveawayActiveButton:
@@ -64,4 +71,5 @@ Buttons:
     Emoji: "🎉"
 
 Strings:
+  DefaultColor: "Aqua"
   GiveawayWinnerMessage: "Congratulations, {winners}, you won **{prize}**!"

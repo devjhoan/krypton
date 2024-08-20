@@ -1,4 +1,4 @@
-import { type APIEmbed, resolveColor } from "discord.js";
+import { type APIEmbed, type ColorResolvable, resolveColor } from "discord.js";
 import bot from "..";
 
 // TODO: This code need to be improved
@@ -8,7 +8,9 @@ function replaceAll(
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	replaces: { [key: string]: string | any } = {},
 ) {
-	replaces["{color-default}"] = resolveColor("Aqua");
+	replaces["{color-default}"] = resolveColor(
+		bot.messages.Strings.DefaultColor as ColorResolvable,
+	);
 	replaces["{bot-username}"] = bot?.user?.username;
 	replaces["{bot-avatar}"] = bot?.user?.displayAvatarURL();
 	replaces["{bot-tag}"] = bot?.user?.tag;

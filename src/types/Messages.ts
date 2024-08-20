@@ -6,14 +6,19 @@ interface Button {
 	Style: ButtonStyle;
 }
 
-const embedsKeys = [
+export const embedsKeys = [
 	"GiveawayCreated",
 	"GiveawayEnded",
 	"GiveawayEntryRegistered",
+	"UserMessagesEmbed",
 ] as const;
 
-const buttonsKeys = ["GiveawayActiveButton", "GiveawayEndedButton"] as const;
-const stringsKeys = ["GiveawayWinnerMessage"] as const;
+export const buttonsKeys = [
+	"GiveawayActiveButton",
+	"GiveawayEndedButton",
+] as const;
+
+export const stringsKeys = ["GiveawayWinnerMessage", "DefaultColor"] as const;
 
 type EmbedKeys = (typeof embedsKeys)[number];
 type ConfigEmbeds = Record<EmbedKeys, Partial<APIEmbed>>;
