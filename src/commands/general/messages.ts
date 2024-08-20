@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType } from "discord.js";
-import { Command } from "../../structures/Command";
+import { Command } from "@/structures/Command";
+import replaceAll from "@/utils/replaceAll";
 
 export default new Command({
 	name: "messages",
@@ -21,5 +22,15 @@ export default new Command({
 				messages: 0,
 			});
 		}
+
+		await interaction.reply({
+			embeds: [
+				replaceAll(client.messages.Embeds.UserMessagesEmbed, {
+					"{user-id}": user.id,
+					"{user-username}": user.username,
+					"{messages}": userProfile.messages,
+				}),
+			],
+		});
 	},
 });
