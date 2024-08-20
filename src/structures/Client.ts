@@ -1,14 +1,13 @@
 import { validateEmbedObject } from "@/utils/validateEmbedObject";
-import { embedsKeys, type MessagesFile } from "@/types/Messages";
 import { GiveawayManager } from "@/modules/GiveawayManager";
+import { config, messages } from "@/utils/getConfigFiles";
 import type { CommandType } from "@/types/Command";
 import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
+import { embedsKeys } from "@/types/Messages";
 import type { DataSource } from "typeorm";
 import Logger from "@/utils/Logger";
-import { readFileSync } from "fs";
 import { join } from "node:path";
-import { load } from "js-yaml";
 import { glob } from "glob";
 
 import { Giveaway } from "@/db/entity/Giveaway";
@@ -30,9 +29,8 @@ class Bot extends Client {
 	public logger = new Logger();
 	public commands: Collection<string, CommandType> = new Collection();
 	public giveawayManager: GiveawayManager;
-	public messages = load(
-		readFileSync(join(process.cwd(), "config", "messages.yml"), "utf8"),
-	) as MessagesFile;
+	public messages = messages;
+	public config = config;
 
 	public db = {
 		guilds: AppDataSource.getRepository(Guild),
@@ -62,7 +60,7 @@ class Bot extends Client {
 		this.on("error", this.handleDiscordError.bind(this));
 
 		this.validateConfigFiles();
-		this.login(process.env.TOKEN).catch(console.error);
+		this.login(this.config.GeneralSettings.Token).catch(console.error);
 		this.giveawayManager = new GiveawayManager(this);
 	}
 

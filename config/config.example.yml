@@ -1,0 +1,7 @@
+GeneralSettings:
+  Token: "Your-Discord-Bot-Token-Here"
+
+DatabaseSettings:
+  Type: "sqlite" # sqlite, mongodb
+  MongoUri: "mongodb://localhost:27017/Krypton"
+  SQLitePath: "krypton.db"
