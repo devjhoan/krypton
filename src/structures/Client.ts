@@ -1,6 +1,6 @@
 import { validateEmbedObject } from "@/utils/validateEmbedObject";
 import { embedsKeys, type MessagesFile } from "@/types/Messages";
-import { GiveawayManager } from "@/modules/giveawayManager";
+import { GiveawayManager } from "@/modules/GiveawayManager";
 import type { CommandType } from "@/types/Command";
 import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
