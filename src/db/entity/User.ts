@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { PrimaryColumn } from "@/utils/database";
+import { Column, Entity } from "typeorm";
 
 @Entity()
 export class User {

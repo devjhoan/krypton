@@ -1,8 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { PrimaryColumn } from "@/utils/database";
+import { Column, Entity } from "typeorm";
 
 @Entity()
 export class Giveaway {
-	@PrimaryGeneratedColumn("uuid")
+	@PrimaryColumn()
 	giveawayId: string;
 
 	@Column()

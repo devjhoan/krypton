@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryColumn, BeforeInsert } from "typeorm";
+import { Column, Entity, BeforeInsert } from "typeorm";
 import type { DotNotation, ValueOf } from "../types";
+import { PrimaryColumn } from "@/utils/database";
 
 interface TicketSettings {
 	transcriptChannel: string;
