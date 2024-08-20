@@ -1,10 +1,9 @@
+import { validateEmbedObject } from "@/utils/validateEmbedObject";
+import { embedsKeys, type MessagesFile } from "@/types/Messages";
 import { GiveawayManager } from "@/modules/giveawayManager";
-import type { MessagesFile } from "@/types/Messages";
 import type { CommandType } from "@/types/Command";
 import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
-import { Giveaway } from "@/db/entity/Giveaway";
-import { Guild } from "@/db/entity/Guild";
 import type { DataSource } from "typeorm";
 import Logger from "@/utils/Logger";
 import { readFileSync } from "fs";
@@ -12,12 +11,17 @@ import { join } from "node:path";
 import { load } from "js-yaml";
 import { glob } from "glob";
 
+import { Giveaway } from "@/db/entity/Giveaway";
+import { Guild } from "@/db/entity/Guild";
+import { User } from "@/db/entity/User";
+
 import {
 	Client,
 	GatewayIntentBits,
 	DiscordjsError,
 	Collection,
 	type ClientEvents,
+	ButtonStyle,
 } from "discord.js";
 
 class Bot extends Client {
@@ -33,6 +37,7 @@ class Bot extends Client {
 	public db = {
 		guilds: AppDataSource.getRepository(Guild),
 		giveaways: AppDataSource.getRepository(Giveaway),
+		users: AppDataSource.getRepository(User),
 	};
 
 	constructor() {
@@ -54,8 +59,9 @@ class Bot extends Client {
 		});
 
 		this.on("ready", this.handleReadyEvent.bind(this));
-		// this.on("error", this.handleDiscordError.bind(this));
+		this.on("error", this.handleDiscordError.bind(this));
 
+		this.validateConfigFiles();
 		this.login(process.env.TOKEN).catch(console.error);
 		this.giveawayManager = new GiveawayManager(this);
 	}
@@ -148,6 +154,42 @@ class Bot extends Client {
 			});
 
 			this.logger.info("Created database entry for the server");
+		}
+	}
+
+	private validateConfigFiles() {
+		let errors = 0;
+
+		for (const button of Object.values(this.messages.Buttons)) {
+			if (!Object.values(ButtonStyle).includes(button.Style)) {
+				errors++;
+				this.logger.error(
+					`Button (${button.Label}) has an invalid style (${button.Style})`,
+				);
+			} else {
+				button.Style = Object.values(ButtonStyle).indexOf(button.Style) + 1;
+			}
+		}
+
+		for (const embed of embedsKeys) {
+			const embedConfig = this.messages.Embeds[embed];
+			const embedValidation = validateEmbedObject(embedConfig);
+
+			if (!embedConfig) {
+				errors++;
+				this.logger.error(`Embed (${embed}) was not found, please add it`);
+			} else if (!embedValidation.valid) {
+				errors++;
+				this.logger.error(
+					`Embed (${embed}.${embedValidation.key}) is not valid: ${embedValidation.message}`,
+				);
+			}
+		}
+
+		if (errors > 0) {
+			process.exit(1);
+		} else {
+			this.logger.success("All config files are valid and ready");
 		}
 	}
 }
