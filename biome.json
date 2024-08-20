@@ -1,8 +1,12 @@
 {
 	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
 	"files": {
-		"ignore": ["node_modules/**/*"],
-		"include": ["src/**/*"]
+		"ignore": [
+			"node_modules/**/*"
+		],
+		"include": [
+			"src/**/*"
+		]
 	},
 	"linter": {
 		"enabled": true,
@@ -19,6 +23,9 @@
 			"correctness": {
 				"noUnusedImports": "warn",
 				"noUnusedVariables": "warn"
+			},
+			"complexity": {
+				"noBannedTypes": "off"
 			}
 		}
 	},
