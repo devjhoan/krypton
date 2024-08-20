@@ -8,7 +8,8 @@
 	"scripts": {
 		"start": "bun run src/index.ts",
 		"dev": "bun --hot run src/index.ts",
-		"format": "bunx biome format"
+		"format": "bunx biome format",
+		"lint": "bunx biome lint"
 	},
 	"dependencies": {
 		"discord.js": "^14.15.3",
