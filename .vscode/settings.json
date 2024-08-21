@@ -6,6 +6,7 @@
 		"commands",
 		"events",
 		"modules",
-		"config"
+		"config",
+		"db"
 	]
 }
