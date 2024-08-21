@@ -3,9 +3,11 @@ export type DotNotation<T> = T extends object
 			[K in keyof T]: K extends string
 				? T[K] extends Function
 					? never
-					: T[K] extends object
-						? `${K}` | `${K}.${DotNotation<T[K]>}`
-						: `${K}`
+					: T[K] extends Array<unknown>
+						? `${K}`
+						: T[K] extends object
+							? `${K}` | `${K}.${DotNotation<T[K]>}`
+							: `${K}`
 				: never;
 		}[keyof T]
 	: never;
