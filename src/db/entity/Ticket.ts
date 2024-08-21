@@ -6,7 +6,7 @@ export class Ticket {
 	@PrimaryColumn()
 	ticketId: string;
 
-	@Column()
+	@Column("text")
 	guildId: string;
 
 	@Column()
@@ -17,6 +17,15 @@ export class Ticket {
 
 	@Column()
 	categoryId: string;
+
+	@Column({ default: "" })
+	messageControl: string;
+
+	@Column("text", { default: "" })
+	claimedBy: string;
+
+	@Column("boolean", { default: false })
+	closed: boolean;
 
 	@Column()
 	createdAt: Date;
