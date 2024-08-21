@@ -1,6 +1,6 @@
 interface LoggerProps {
 	type: "warn" | "success" | "error" | "info";
-	message: string;
+	message: string | Error;
 	date?: Date;
 }
 
@@ -17,6 +17,10 @@ class Logger {
 	}
 
 	private logger({ type, message }: LoggerProps) {
+		if (typeof message !== "string") {
+			return console.error(message);
+		}
+
 		const [emoji, color] = this.emojis[type];
 		console.log(`${color} ${emoji} ${message}\x1b[0m`);
 	}
@@ -37,7 +41,7 @@ class Logger {
 		});
 	}
 
-	public error(args: string) {
+	public error(args: string | Error) {
 		this.logger({
 			type: "error",
 			message: args,

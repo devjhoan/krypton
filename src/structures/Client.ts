@@ -58,6 +58,7 @@ class Bot extends Client {
 
 		this.on("ready", this.handleReadyEvent.bind(this));
 		this.on("error", this.handleDiscordError.bind(this));
+		this.handleErrors();
 
 		this.validateConfigFiles();
 		this.login(this.config.GeneralSettings.Token).catch(console.error);
@@ -116,13 +117,17 @@ class Bot extends Client {
 		await this.loadEvents();
 	}
 
-	private handleDiscordError(error: Error | DiscordjsError) {
-		if (!(error instanceof Error)) {
-			return this.logger.error(error);
+	public handleDiscordError(error: Error | DiscordjsError) {
+		if (
+			error.message.includes("Unknown Message") ||
+			error.message.includes("Collector")
+		) {
+			console.log(1);
+			return console.log(error);
 		}
 
-		if (!(error instanceof DiscordjsError)) {
-			return this.logger.error(error.message);
+		if (!(error instanceof Error) || !(error instanceof DiscordjsError)) {
+			return this.logger.error(error);
 		}
 
 		if (error.code === "TokenInvalid") {
@@ -189,6 +194,11 @@ class Bot extends Client {
 		} else {
 			this.logger.success("All config files are valid and ready");
 		}
+	}
+
+	private handleErrors() {
+		process.on("unhandledRejection", this.handleDiscordError.bind(this));
+		process.on("uncaughtException", this.handleDiscordError.bind(this));
 	}
 }
 

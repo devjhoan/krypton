@@ -15,7 +15,7 @@ export default new Event(Events.InteractionCreate, async (interaction) => {
 			interaction: interaction as ExtendedInteraction,
 		});
 	} catch (error) {
-		console.error(error);
+		bot.handleDiscordError(error as Error);
 
 		await interaction[
 			interaction.replied || interaction.deferred ? "editReply" : "reply"
