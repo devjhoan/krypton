@@ -1,10 +1,14 @@
-import { Column, Entity, BeforeInsert } from "typeorm";
+import type { TicketCategory, TicketSettings } from "@/types/Guild";
+import { defaultJsonify, jsonType, PrimaryColumn } from "@/utils/database";
 import type { DotNotation, ValueOf } from "../types";
 import { Column, Entity } from "typeorm";
 
 @Entity()
 export class Guild {
 	@PrimaryColumn()
+	id: string;
+
+	@Column()
 	guildId: string;
 
 	@Column({ default: null })
@@ -20,16 +24,19 @@ export class Guild {
 	})
 	ticketSettings: TicketSettings;
 
-	@BeforeInsert()
-	setDefaultTicketSettings() {
-		if (!this.ticketSettings) {
-			this.ticketSettings = {
-				transcriptChannel: "",
-				maxTicketsPerUser: 3,
-				enabled: true,
-			};
-		}
-	}
+	@Column({
+		type: jsonType(),
+		nullable: true,
+		transformer: {
+			to(value: Array<TicketCategory>): string {
+				return JSON.stringify(value);
+			},
+			from(value: string): Array<TicketCategory> {
+				return JSON.parse(value);
+			},
+		},
+	})
+	ticketCategories: Array<TicketCategory>;
 
 	getValueByString<K extends DotNotation<Guild>>(key: K): ValueOf<Guild, K> {
 		return key.split(".").reduce(
