@@ -1,12 +1,6 @@
 import { Column, Entity, BeforeInsert } from "typeorm";
 import type { DotNotation, ValueOf } from "../types";
-import { PrimaryColumn } from "@/utils/database";
-
-interface TicketSettings {
-	transcriptChannel: string;
-	maxTicketsPerUser: number;
-	enabled: boolean;
-}
+import { Column, Entity } from "typeorm";
 
 @Entity()
 export class Guild {
@@ -16,7 +10,14 @@ export class Guild {
 	@Column({ default: null })
 	logsChannelId: string;
 
-	@Column({ type: "simple-json", nullable: true })
+	@Column({
+		type: jsonType(),
+		default: defaultJsonify<TicketSettings>({
+			enabled: true,
+			maxTicketsPerUser: 3,
+			transcriptChannel: "",
+		}),
+	})
 	ticketSettings: TicketSettings;
 
 	@BeforeInsert()
