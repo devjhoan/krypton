@@ -99,6 +99,7 @@ class Bot extends Client {
 	private async loadEvents() {
 		const eventFiles = await glob(
 			join(__dirname, "..", "events", "**/*{.js,ts}"),
+			{ nodir: true },
 		);
 
 		for await (const filePath of eventFiles) {
