@@ -1,6 +1,8 @@
 import { EmbedSetup, QuestionType } from "@/modules/EmbedSetup";
+import type { TicketCategory } from "@/types/Guild";
 import { Command } from "@/structures/Command";
 import { deepMerge } from "@/db/entity/Guild";
+import replaceAll from "@/utils/replaceAll";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -10,9 +12,7 @@ import {
 	type ColorResolvable,
 	ActionRowBuilder,
 	ButtonBuilder,
-	ButtonStyle,
 } from "discord.js";
-import type { TicketCategory } from "@/types/Guild";
 
 const ticketQuestions = [
 	{
@@ -41,7 +41,7 @@ const ticketQuestions = [
 	},
 	{
 		label: "Button Style",
-		emoji: "⚙️",
+		emoji: "🎨",
 		key: "buttonStyle",
 		type: QuestionType.Button,
 	},
@@ -298,16 +298,20 @@ export default new Command({
 				components: [],
 			});
 
+			const displayTicketCategories = parsedCategories.map((ticket) =>
+				replaceAll(client.messages.Strings.TicketCategoryParsed, {
+					"{emoji}": ticket.emoji,
+					"{name}": ticket.name,
+					"{id}": ticket.id,
+				}),
+			);
+
 			await channel.send({
 				embeds: [
-					new EmbedBuilder()
-						.setTitle("🎫 Ticket Categories")
-						.setColor(client.messages.Strings.DefaultColor as ColorResolvable)
-						.setDescription(
-							parsedCategories
-								.map((ticket) => `${ticket.emoji} ${ticket.name}`)
-								.join("\n"),
-						),
+					replaceAll(client.messages.Embeds.CreateTicketEmbed, {
+						"{categories}": displayTicketCategories.join("\n"),
+						"{categories-total}": displayTicketCategories.length,
+					}),
 				],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -315,7 +319,7 @@ export default new Command({
 							return new ButtonBuilder()
 								.setEmoji(ticket.emoji)
 								.setLabel(ticket.name)
-								.setStyle(ButtonStyle.Primary)
+								.setStyle(ticket.buttonStyle)
 								.setCustomId(`ticket-${ticket.id}`);
 						}),
 					),
