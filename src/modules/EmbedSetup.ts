@@ -223,8 +223,8 @@ export class EmbedSetup<
 		const json: Partial<FinalJsonType<Q>> = {};
 		for (const question of this.questions) {
 			const key = question.key as keyof FinalJsonType<Q>;
-			json[key] = (this.getDefaultValue(question.type) ||
-				value?.[key]) as FinalJsonType<Q>[typeof key];
+			json[key] = (value?.[key] ||
+				this.getDefaultValue(question.type)) as FinalJsonType<Q>[typeof key];
 		}
 
 		return json as FinalJsonType<Q>;
