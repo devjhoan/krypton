@@ -59,6 +59,58 @@ Embeds:
     footer:
       text: "{bot-username}"
       iconURL: "{bot-avatar}"
+  CreateTicketEmbed:
+    title: "Support Tickets"
+    color: "{color-default}"
+    description: |
+      🌟 Hello there! Having trouble? Looking for help?
+      Support tickets are the best way to get in contact with our staff teams.
+
+      **Ticket Categories:**
+      {categories}
+
+      ⏰ Staff try to reply as fast as possible in each ticket, so please don't ping staff unless its urgent.
+    footer:
+      text: "{bot-username} • Support System"
+      iconURL: "{bot-avatar}"
+  UserAlreadyHaveTicketEmbed:
+    title: "You have exceeded the maximum number of tickets allowed"
+    color: "{color-default}"
+  CreatedTicketEmbed:
+    title: "Support System"
+    description: "Your ticket has been created <#{channel-id}>"
+    color: "{color-default}"
+  TicketMainEmbed:
+    title: "{emoji} {name}"
+    color: "{color-default}"
+    description: |
+      Thank you for reaching out for support! Staff will be with you shortly.
+      In the meantime, please answer the following question(s)"
+    fields:
+      - name: "🏷 Ticket Category"
+        value: "{name}"
+        inline: true
+      - name: "👤 Ticket Owner"
+        value: "<@{user-id}>"
+        inline: true
+      - name: "⏰ Created At"
+        value: "<t:{timestamp}:R>"
+        inline: true
+    footer:
+      text: "{bot-username} • Support System"
+      iconURL: "{bot-avatar}"
+  TicketManageEmbed:
+    title: "This ticket has been closed by {user-username}"
+    color: "{color-default}"
+  OpenedTicketEmbed:
+    title: "This ticket has been opened by {user-username}"
+    color: "{color-default}"
+  ClaimedTicketEmbed:
+    title: "This ticket has been claimed by {user-username}"
+    color: "{color-default}"
+  DeleteTicketEmbed:
+    title: "This ticket will be deleted in 5 seconds (action by {user-username})"
+    color: "{color-default}"
 
 Buttons:
   GiveawayActiveButton:
@@ -69,7 +121,28 @@ Buttons:
     Label: "Ended"
     Style: "Secondary"
     Emoji: "🎉"
+  CloseTicketButton:
+    Label: "Close"
+    Style: "Secondary"
+    Emoji: "🔒"
+  ClaimTicketButton:
+    Label: "Claim"
+    Style: "Secondary"
+    Emoji: "👋"
+  OpenTicketButton:
+    Label: "Open"
+    Style: "Secondary"
+    Emoji: "🔓"
+  DeleteTicketButton:
+    Label: "Delete"
+    Style: "Secondary"
+    Emoji: "🗑"
+  TranscriptTicketButton:
+    Label: "Transcript"
+    Style: "Secondary"
+    Emoji: "📑"
 
 Strings:
   DefaultColor: "Aqua"
   GiveawayWinnerMessage: "Congratulations, {winners}, you won **{prize}**!"
+  TicketCategoryParsed: "{emoji} » {name}"

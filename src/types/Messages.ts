@@ -11,14 +11,31 @@ export const embedsKeys = [
 	"GiveawayEnded",
 	"GiveawayEntryRegistered",
 	"UserMessagesEmbed",
+	"CreateTicketEmbed",
+	"UserAlreadyHaveTicketEmbed",
+	"CreatedTicketEmbed",
+	"TicketMainEmbed",
+	"TicketManageEmbed",
+	"OpenedTicketEmbed",
+	"ClaimedTicketEmbed",
+	"DeleteTicketEmbed",
 ] as const;
 
 export const buttonsKeys = [
 	"GiveawayActiveButton",
 	"GiveawayEndedButton",
+	"CloseTicketButton",
+	"ClaimTicketButton",
+	"OpenTicketButton",
+	"DeleteTicketButton",
+	"TranscriptTicketButton",
 ] as const;
 
-export const stringsKeys = ["GiveawayWinnerMessage", "DefaultColor"] as const;
+export const stringsKeys = [
+	"GiveawayWinnerMessage",
+	"DefaultColor",
+	"TicketCategoryParsed",
+] as const;
 
 type EmbedKeys = (typeof embedsKeys)[number];
 type ConfigEmbeds = Record<EmbedKeys, Partial<APIEmbed>>;
