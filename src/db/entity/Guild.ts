@@ -1,5 +1,5 @@
-import type { TicketCategory, TicketSettings } from "@/types/Guild";
 import { defaultJsonify, jsonType, PrimaryColumn } from "@/utils/database";
+import type { TicketCategory, TicketSettings } from "@/types/Guild";
 import type { DotNotation, ValueOf } from "../types";
 import { Column, Entity } from "typeorm";
 
@@ -14,12 +14,17 @@ export class Guild {
 	@Column({ default: null })
 	logsChannelId: string;
 
+	@Column({ default: 1 })
+	ticketsCount: number;
+
 	@Column({
 		type: jsonType(),
 		default: defaultJsonify<TicketSettings>({
 			enabled: true,
 			maxTicketsPerUser: 3,
 			transcriptChannel: "",
+			transcriptOnClose: false,
+			transcriptType: "channel",
 		}),
 	})
 	ticketSettings: TicketSettings;

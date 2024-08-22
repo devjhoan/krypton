@@ -152,7 +152,9 @@ export class EmbedSetup<
 
 				const collector = message.createMessageComponentCollector({
 					time: ms("5m"),
-					filter: (i) => i.customId.startsWith(this.panelId),
+					filter: (i) =>
+						i.user.id === interaction.user.id &&
+						i.customId.startsWith(this.panelId),
 				});
 
 				collector.on("collect", async (i) => {

@@ -40,6 +40,7 @@ enum ConfigOptionType {
 	Number = "number",
 	Role = "role",
 	Boolean = "boolean",
+	Select = "select",
 }
 
 interface DefaultOptionKeys {
@@ -52,11 +53,19 @@ interface ConfigOptionChannel extends DefaultOptionKeys {
 	channelType: ChannelType;
 }
 
+interface ConfigOptionSelect extends DefaultOptionKeys {
+	option: ConfigOptionType.Select;
+	choices: Array<{ label: string; value: string; emoji: string }>;
+}
+
 interface ConfigDefaultOption extends DefaultOptionKeys {
 	option: ConfigOptionType;
 }
 
-type ConfigOption = ConfigOptionChannel | ConfigDefaultOption;
+type ConfigOption =
+	| ConfigOptionSelect
+	| ConfigOptionChannel
+	| ConfigDefaultOption;
 
 const categories: Array<Category> = [
 	{
@@ -91,6 +100,33 @@ const categories: Array<Category> = [
 				option: ConfigOptionType.Number,
 				databaseKey: "ticketSettings.maxTicketsPerUser",
 			},
+			{
+				label: "Automatic Transcript on Close",
+				option: ConfigOptionType.Boolean,
+				databaseKey: "ticketSettings.transcriptOnClose",
+			},
+			{
+				label: "Transcript Type",
+				option: ConfigOptionType.Select,
+				databaseKey: "ticketSettings.transcriptType",
+				choices: [
+					{
+						label: "User",
+						value: "user",
+						emoji: "👤",
+					},
+					{
+						label: "Channel",
+						value: "channel",
+						emoji: "🧩",
+					},
+					{
+						label: "Both",
+						value: "both",
+						emoji: "🚀",
+					},
+				],
+			},
 		],
 	},
 ];
@@ -117,6 +153,7 @@ export class BotSettings {
 
 		const collector = message.createMessageComponentCollector({
 			componentType: ComponentType.StringSelect,
+			filter: (i) => i.user.id === interaction.user.id,
 			time: ms("5m"),
 		});
 
@@ -194,10 +231,6 @@ export class BotSettings {
 					);
 
 					await this.bot.db.guilds.save(updatedGuild);
-					await i.followUp({
-						content: `**${option.label}** has been set to **${userOptionResponse}**`,
-						ephemeral: true,
-					});
 				}
 
 				const { categoryComponents, categoryEmbed } =
@@ -318,7 +351,8 @@ export class BotSettings {
 
 			const channel = await message.awaitMessageComponent({
 				time: ms("5m"),
-				filter: (i) => i.customId.startsWith(customId),
+				filter: (i) =>
+					i.customId.startsWith(customId) && i.user.id === interaction.user.id,
 			});
 
 			if (!channel) {
@@ -359,7 +393,8 @@ export class BotSettings {
 
 			const role = await message.awaitMessageComponent({
 				time: ms("5m"),
-				filter: (i) => i.customId === customId,
+				filter: (i) =>
+					i.customId === customId && i.user.id === interaction.user.id,
 			});
 
 			if (!role) {
@@ -403,7 +438,8 @@ export class BotSettings {
 
 			const button = await message.awaitMessageComponent({
 				time: ms("5m"),
-				filter: (i) => i.customId.startsWith(customId),
+				filter: (i) =>
+					i.customId.startsWith(customId) && i.user.id === interaction.user.id,
 				componentType: ComponentType.Button,
 			});
 
@@ -420,6 +456,50 @@ export class BotSettings {
 			}
 
 			return button?.customId === `${customId}-yes`;
+		}
+
+		if (isConfigOptionSelect(option) && option.choices.length > 0) {
+			const customId = `select-${category.label}-${option.label}`;
+			const message = await interaction.update({
+				components: [
+					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+						new StringSelectMenuBuilder()
+							.setCustomId(customId)
+							.setMinValues(1)
+							.setMaxValues(1)
+							.setOptions(option.choices.map((option) => option))
+							.setPlaceholder("Select an option"),
+					),
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						new ButtonBuilder()
+							.setCustomId(`${customId}-back`)
+							.setLabel("Back")
+							.setEmoji("◀")
+							.setStyle(ButtonStyle.Secondary),
+					),
+				],
+			});
+
+			const select = await message.awaitMessageComponent({
+				time: ms("5m"),
+				filter: (i) =>
+					i.customId.startsWith(customId) && i.user.id === interaction.user.id,
+			});
+
+			if (!select) {
+				await interaction.reply({
+					content: `**${option.label}** is not a valid option. Please choose one of the options.`,
+					ephemeral: true,
+				});
+				return null;
+			}
+
+			await select.deferUpdate();
+			if (!select.isStringSelectMenu()) {
+				return null;
+			}
+
+			return select.values[0];
 		}
 	}
 
@@ -495,8 +575,18 @@ export class BotSettings {
 		}
 
 		const optionValue = guild.getValueByString(option.databaseKey);
-		if (optionValue === undefined || optionValue === null) {
+		if (
+			optionValue === undefined ||
+			optionValue === null ||
+			optionValue === ""
+		) {
 			return "Not Set";
+		}
+
+		let selectValue = "";
+		if (isConfigOptionSelect(option)) {
+			selectValue =
+				option.choices.find((c) => c.value === optionValue)?.label || "Not Set";
 		}
 
 		switch (option.option) {
@@ -508,6 +598,8 @@ export class BotSettings {
 				return `${optionValue}`;
 			case ConfigOptionType.Role:
 				return `<@&${optionValue}>`;
+			case ConfigOptionType.Select:
+				return `${selectValue}`;
 			case ConfigOptionType.Boolean:
 				return optionValue ? "Enabled" : "Disabled";
 			default:
@@ -527,6 +619,8 @@ export class BotSettings {
 				return "🔒";
 			case ConfigOptionType.Boolean:
 				return "⚙️";
+			case ConfigOptionType.Select:
+				return "📚";
 			default:
 				return "❓";
 		}
@@ -537,4 +631,10 @@ function isConfigOptionChannel(
 	option: ConfigOption,
 ): option is ConfigOptionChannel {
 	return option.option === ConfigOptionType.Channel;
+}
+
+function isConfigOptionSelect(
+	option: ConfigOption,
+): option is ConfigOptionSelect {
+	return option.option === ConfigOptionType.Select;
 }
