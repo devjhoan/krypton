@@ -1,6 +1,7 @@
 import { Giveaway } from "@/db/entity/Giveaway";
 import { config } from "@/utils/getConfigFiles";
 import { Guild } from "@/db/entity/Guild";
+import { Ticket } from "./entity/Ticket";
 import { User } from "@/db/entity/User";
 import { DataSource } from "typeorm";
 
@@ -10,5 +11,5 @@ export const AppDataSource = new DataSource({
 	url: config.DatabaseSettings.MongoUri,
 	synchronize: true,
 	logging: false,
-	entities: [Guild, Giveaway, User],
+	entities: [Guild, Giveaway, User, Ticket],
 });

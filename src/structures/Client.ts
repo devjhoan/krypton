@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { glob } from "glob";
 
 import { Giveaway } from "@/db/entity/Giveaway";
+import { Ticket } from "@/db/entity/Ticket";
 import { Guild } from "@/db/entity/Guild";
 import { User } from "@/db/entity/User";
 
@@ -36,6 +37,7 @@ class Bot extends Client {
 		guilds: AppDataSource.getRepository(Guild),
 		giveaways: AppDataSource.getRepository(Giveaway),
 		users: AppDataSource.getRepository(User),
+		tickets: AppDataSource.getRepository(Ticket),
 	};
 
 	constructor() {
