@@ -5,6 +5,7 @@ export interface TicketSettings {
 	maxTicketsPerUser: number;
 	transcriptOnClose: boolean;
 	transcriptType: "user" | "channel" | "both";
+	saveImagesInTranscript: boolean;
 	enabled: boolean;
 }
 

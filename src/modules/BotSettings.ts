@@ -127,6 +127,11 @@ const categories: Array<Category> = [
 					},
 				],
 			},
+			{
+				label: "Save Images in Transcripts",
+				option: ConfigOptionType.Boolean,
+				databaseKey: "ticketSettings.saveImagesInTranscript",
+			},
 		],
 	},
 ];

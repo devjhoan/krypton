@@ -25,6 +25,7 @@ export class Guild {
 			transcriptChannel: "",
 			transcriptOnClose: false,
 			transcriptType: "channel",
+			saveImagesInTranscript: false,
 		}),
 	})
 	ticketSettings: TicketSettings;

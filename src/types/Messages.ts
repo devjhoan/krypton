@@ -19,6 +19,8 @@ export const embedsKeys = [
 	"OpenedTicketEmbed",
 	"ClaimedTicketEmbed",
 	"DeleteTicketEmbed",
+	"TranscriptEmbed",
+	"TranscriptCreatedEmbed",
 ] as const;
 
 export const buttonsKeys = [

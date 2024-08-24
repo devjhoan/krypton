@@ -111,6 +111,30 @@ Embeds:
   DeleteTicketEmbed:
     title: "This ticket will be deleted in 5 seconds (action by {user-username})"
     color: "{color-default}"
+  TranscriptEmbed:
+    color: "{color-default}"
+    author:
+      name: "{owner-username} ({owner-id})"
+      iconURL: "{owner-avatar}"
+    fields:
+      - name: "Ticket Owner"
+        value: "<@!{owner-id}>"
+        inline: true
+      - name: "Ticket Name"
+        value: "{ticket-name}"
+        inline: true
+      - name: "Category Name"
+        value: "{category-name}"
+        inline: true
+      - name: "Direct Transcript"
+        value: "[Direct Link]({transcript-url})"
+        inline: true
+      - name: "Ticket Closed"
+        value: "{staff-tag}"
+        inline: true
+  TranscriptCreatedEmbed:
+    title: "The transcript has been send successfully"
+    color: "{color-default}"
 
 Buttons:
   GiveawayActiveButton:
