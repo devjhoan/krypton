@@ -1,14 +1,18 @@
 import { PrimaryColumn } from "@/utils/database";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, Unique } from "typeorm";
 
 @Entity()
+@Unique(["userId"])
 export class User {
 	@PrimaryColumn()
 	id: string;
 
-	@Column()
+	@Column("text")
 	userId: string;
 
-	@Column()
+	@Column("text")
+	guildId: string;
+
+	@Column("number")
 	messages: number;
 }

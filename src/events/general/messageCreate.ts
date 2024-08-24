@@ -13,6 +13,7 @@ export default new Event(Events.MessageCreate, async (message) => {
 	if (!userProfile) {
 		return await bot.db.users.save({
 			userId: message.author.id,
+			guildId: message.guild.id,
 			messages: 1,
 		});
 	}

@@ -19,6 +19,7 @@ export default new Command({
 		if (!userProfile) {
 			userProfile = await client.db.users.save({
 				userId: user.id,
+				guildId: interaction.guild.id,
 				messages: 0,
 			});
 		}
