@@ -134,6 +134,23 @@ const categories: Array<Category> = [
 			},
 		],
 	},
+	{
+		emoji: "👋",
+		label: "Welcome",
+		options: [
+			{
+				label: "System Enabled",
+				option: ConfigOptionType.Boolean,
+				databaseKey: "welcomeSettings.enabled",
+			},
+			{
+				label: "Welcome Channel",
+				option: ConfigOptionType.Channel,
+				channelType: ChannelType.GuildText,
+				databaseKey: "welcomeSettings.channel",
+			},
+		],
+	},
 ];
 
 export class BotSettings {

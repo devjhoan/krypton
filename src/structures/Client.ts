@@ -155,7 +155,7 @@ class Bot extends Client {
 
 		const guilds = await this.db.guilds.find();
 		if (guilds.length === 0) {
-			await this.db.guilds.save({
+			await this.db.guilds.insert({
 				guildId: serverGuild.id,
 			});
 

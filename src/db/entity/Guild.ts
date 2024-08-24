@@ -1,18 +1,33 @@
 import { defaultJsonify, jsonType, PrimaryColumn } from "@/utils/database";
-import type { TicketCategory, TicketSettings } from "@/types/Guild";
 import type { DotNotation, ValueOf } from "../types";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, Unique } from "typeorm";
+
+import type {
+	TicketCategory,
+	TicketSettings,
+	WelcomeSettings,
+} from "@/types/Guild";
 
 @Entity()
+@Unique(["guildId"])
 export class Guild {
 	@PrimaryColumn()
 	id: string;
 
-	@Column()
+	@Column({ unique: true })
 	guildId: string;
 
 	@Column({ default: null })
 	logsChannelId: string;
+
+	@Column({
+		type: jsonType(),
+		default: defaultJsonify<WelcomeSettings>({
+			enabled: false,
+			channel: "",
+		}),
+	})
+	welcomeSettings: WelcomeSettings;
 
 	@Column({ default: 1 })
 	ticketsCount: number;

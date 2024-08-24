@@ -17,3 +17,8 @@ export interface TicketCategory {
 	buttonStyle: ButtonStyle;
 	roles: Array<string>;
 }
+
+export interface WelcomeSettings {
+	enabled: boolean;
+	channel: string;
+}

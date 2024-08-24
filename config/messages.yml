@@ -135,6 +135,18 @@ Embeds:
   TranscriptCreatedEmbed:
     title: "The transcript has been send successfully"
     color: "{color-default}"
+  UserJoinedEmbed:
+    title: "👋 Welcome to {guild-name}"
+    color: "{color-default}"
+    description: |
+      <@!{user-id}>. thank you for joining this great community,
+      you are our member **{memberCount}**, your account was created <t:{createdTimestamp}:R>
+
+      **» User Information**
+      • Username: **{user-username}**
+      • Joined At: <t:{joinedTimestamp}:R>
+    thumbnail:
+      url: "{user-avatar}"
 
 Buttons:
   GiveawayActiveButton:

@@ -13,7 +13,11 @@ export function PrimaryColumn() {
 }
 
 export function defaultJsonify<T extends object | null>(value?: T) {
-	return () => `('${JSON.stringify(value)}')`;
+	if (config.DatabaseSettings.Type === "sqlite") {
+		return () => `('${JSON.stringify(value)}')`;
+	}
+
+	return value;
 }
 
 export function jsonType(): ColumnType {
