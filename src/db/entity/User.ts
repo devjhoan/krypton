@@ -13,6 +13,6 @@ export class User {
 	@Column("text")
 	guildId: string;
 
-	@Column("number")
+	@Column("int")
 	messages: number;
 }
