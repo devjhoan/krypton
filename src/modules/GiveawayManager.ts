@@ -104,11 +104,15 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
-						.setLabel(this.client.messages.Buttons[buttonKey]?.Label)
+						.setLabel(
+							replaceAll(this.client.messages.Buttons[buttonKey]?.Label, {
+								"{entries}": "0",
+							}),
+						)
 						.setStyle(this.client.messages.Buttons[buttonKey]?.Style)
 						.setEmoji(this.client.messages.Buttons[buttonKey]?.Emoji)
 						.setDisabled(giveaway?.ended ?? false)
-						.setCustomId("join-giveaway"),
+						.setCustomId(giveaway.ended ? "end-giveaway" : "join-giveaway"),
 				),
 			],
 		};

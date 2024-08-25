@@ -150,7 +150,7 @@ Embeds:
 
 Buttons:
   GiveawayActiveButton:
-    Label: "Participate"
+    Label: "Participate ({entries})"
     Style: "Primary"
     Emoji: "🎉"
   GiveawayEndedButton:

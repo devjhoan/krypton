@@ -1,6 +1,6 @@
+import { ActionRowBuilder, ButtonBuilder, Events } from "discord.js";
 import replaceAll from "@/utils/replaceAll";
 import { Event } from "@/structures/Event";
-import { Events } from "discord.js";
 import bot from "@/index";
 
 export default new Event(Events.InteractionCreate, async (interaction) => {
@@ -23,6 +23,25 @@ export default new Event(Events.InteractionCreate, async (interaction) => {
 		giveaway.giveawayId,
 		interaction.user.id,
 	);
+
+	await interaction
+		.update({
+			components: [
+				new ActionRowBuilder<ButtonBuilder>().addComponents(
+					new ButtonBuilder()
+						.setLabel(
+							replaceAll(bot.messages.Buttons.GiveawayActiveButton.Label, {
+								"{entries}": giveaway.entries.length + 1,
+							}),
+						)
+						.setStyle(bot.messages.Buttons.GiveawayActiveButton.Style)
+						.setEmoji(bot.messages.Buttons.GiveawayActiveButton.Emoji)
+						.setDisabled(false)
+						.setCustomId("join-giveaway"),
+				),
+			],
+		})
+		.catch(console.error);
 
 	await interaction.reply({
 		embeds: [replaceAll(bot.messages.Embeds.GiveawayEntryRegistered)],
