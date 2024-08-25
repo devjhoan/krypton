@@ -115,6 +115,7 @@ class Bot extends Client {
 	private async handleReadyEvent(client: Client<true>) {
 		this.logger.success(`Logged in as ${client.user.tag}`);
 		await this.initializeDatabase();
+		await this.giveawayManager.startGiveawayInterval();
 
 		await this.loadCommands();
 		await this.loadEvents();

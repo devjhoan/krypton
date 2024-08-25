@@ -32,7 +32,6 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 		super();
 
 		this.client = client;
-		setInterval(this.checkGiveawayStatus.bind(this), ms("5s"));
 
 		this.on("giveawayEnded", async (giveaway) => {
 			const channel = await this.client.channels.fetch(giveaway.channelId);
@@ -47,6 +46,11 @@ export class GiveawayManager extends TypedEmitter<GiveawayEvents> {
 
 			await message.edit(this.generateMessagePayload(giveaway));
 		});
+	}
+
+	async startGiveawayInterval() {
+		await this.checkGiveawayStatus();
+		setInterval(this.checkGiveawayStatus.bind(this), ms("5s"));
 	}
 
 	/**
