@@ -126,7 +126,6 @@ class Bot extends Client {
 			error.message.includes("Unknown Message") ||
 			error.message.includes("Collector")
 		) {
-			console.log(1);
 			return console.log(error);
 		}
 
@@ -140,6 +139,8 @@ class Bot extends Client {
 			);
 			return process.exit(1);
 		}
+
+		return this.logger.error(error);
 	}
 
 	private async initializeDatabase() {
