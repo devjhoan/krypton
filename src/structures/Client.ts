@@ -6,8 +6,8 @@ import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
 import { embedsKeys } from "@/types/Messages";
 import type { DataSource } from "typeorm";
+import { join, sep } from "node:path";
 import Logger from "@/utils/Logger";
-import { join } from "node:path";
 import { glob } from "glob";
 
 import { Giveaway } from "@/db/entity/Giveaway";
@@ -70,14 +70,21 @@ class Bot extends Client {
 	private async loadCommands() {
 		const guild = this.guilds.cache.first();
 		const commandFiles = await glob(
-			join(__dirname, "..", "commands", "**/*{.js,ts}"),
+			join(__dirname, "..", "commands", "**/*{.js,ts}").replace(/\\/g, "/"),
 		);
 
 		for await (const filePath of commandFiles) {
 			const command: CommandType = (await import(filePath))?.default;
 
-			const splitted = filePath.split("/");
+			const splitted = filePath.split(sep);
 			const directory = splitted[splitted.length - 2];
+
+			if (!command || !command.name) {
+				this.logger.error(
+					`There was an error loading the command (${splitted[splitted.length - 1]})`,
+				);
+				continue;
+			}
 
 			this.commands.set(command.name, {
 				...command,
@@ -100,12 +107,21 @@ class Bot extends Client {
 
 	private async loadEvents() {
 		const eventFiles = await glob(
-			join(__dirname, "..", "events", "**/*{.js,ts}"),
+			join(__dirname, "..", "events", "**/*{.js,ts}").replace(/\\/g, "/"),
 			{ nodir: true },
 		);
 
 		for await (const filePath of eventFiles) {
 			const event: Event<keyof ClientEvents> = (await import(filePath)).default;
+			const splitted = filePath.split(sep);
+
+			if (!event?.event || !event?.run) {
+				this.logger.error(
+					`There was an error loading the event (${splitted[splitted.length - 1]})`,
+				);
+				continue;
+			}
+
 			this.on(event.event, event.run);
 		}
 
