@@ -1,62 +1,71 @@
-import { type APIEmbed, type ColorResolvable, resolveColor } from "discord.js";
+import {
+	type APIEmbed,
+	type ColorResolvable,
+	type InteractionReplyOptions,
+	resolveColor,
+} from "discord.js";
 import bot from "..";
 
-// TODO: This code need to be improved
 function replaceAll(
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	embed: string | APIEmbed | Array<any>,
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	replaces: { [key: string]: string | any } = {},
-) {
-	replaces["{color-default}"] = resolveColor(
-		bot.messages.Strings.DefaultColor as ColorResolvable,
-	);
-	replaces["{bot-username}"] = bot?.user?.username;
-	replaces["{bot-avatar}"] = bot?.user?.displayAvatarURL();
-	replaces["{bot-tag}"] = bot?.user?.tag;
+	embed: string | APIEmbed | InteractionReplyOptions | Array<unknown>,
+	replaces: Record<string, string | number> = {},
+): typeof embed {
+	const defaultReplaces = {
+		"{color-default}": resolveColor(
+			bot.messages.Strings.DefaultColor as ColorResolvable,
+		),
+		"{bot-username}": bot?.user?.username ?? "",
+		"{bot-avatar}": bot?.user?.displayAvatarURL() ?? "",
+		"{bot-tag}": bot?.user?.tag ?? "",
+	};
 
-	let cacheEmbed = JSON.parse(JSON.stringify(embed));
+	const allReplaces = { ...defaultReplaces, ...replaces };
+	const replaceString = (str: string): string => {
+		return Object.entries(allReplaces).reduce(
+			(acc, [needle, replacement]) =>
+				acc.replace(new RegExp(needle, "g"), String(replacement)),
+			str,
+		);
+	};
 
-	for (const items of Object.entries(replaces)) {
-		const [needle, replacement] = items;
-		const regExp = new RegExp(needle, "g");
-
-		if (typeof embed === "object") {
-			for (const property in embed) {
-				// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
-				if (!cacheEmbed.hasOwnProperty(property)) continue;
-
-				let value = cacheEmbed[property];
-				let newProperty = property;
-
-				newProperty = property.replace(regExp, replacement);
-
-				if (Array.isArray(value)) {
-					value = replaceAll(value, replaces);
-					value = Object.values(value);
-				} else if (typeof value === "object") {
-					value = replaceAll(value, replaces);
-				} else if (typeof value === "string") {
-					value = value.replaceAll(regExp, replacement);
-				}
-
-				if (
-					property === "color" &&
-					value !== "{color-default}" &&
-					Number.isNaN(parseInt(value))
-				) {
-					cacheEmbed[newProperty] = resolveColor(value);
-					continue;
-				}
-
-				cacheEmbed[newProperty] = value;
-			}
-		} else {
-			cacheEmbed = cacheEmbed.replaceAll(regExp, replacement);
+	const processValue = (value: unknown): unknown => {
+		if (Array.isArray(value)) {
+			return value.map(processValue);
 		}
+		if (typeof value === "object" && value !== null) {
+			return replaceAll(value as Record<string, unknown>, allReplaces);
+		}
+		if (typeof value === "string") {
+			return replaceString(value);
+		}
+		return value;
+	};
+
+	if (typeof embed === "string") {
+		return replaceString(embed);
 	}
 
-	return cacheEmbed;
+	if (typeof embed === "object" && embed !== null) {
+		const result: Record<string, unknown> = {};
+		for (const [key, value] of Object.entries(embed)) {
+			const newKey = replaceString(key);
+			let newValue = processValue(value);
+
+			if (
+				newKey === "color" &&
+				typeof newValue === "string" &&
+				newValue !== "{color-default}"
+			) {
+				newValue = resolveColor(newValue as ColorResolvable);
+			}
+
+			result[newKey] = newValue;
+		}
+
+		return result as typeof embed;
+	}
+
+	return embed;
 }
 
 export default replaceAll;
