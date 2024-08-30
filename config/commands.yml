@@ -1,0 +1,61 @@
+# Commands Configuration File
+# 
+# This file is used to configure the commands that the bot will use.
+# The command object needs to have the following properties:
+
+# [key: string]: The name of the command.
+#   Enabled: Indicates whether the command is enabled. <true|false>
+#   Permissions: The permissions required to use the command. Array<"userId"|"roleId"|"roleName"|"everyone">
+#   Cooldown: The cooldown period for the command. <"1h"|"1d">
+
+BotCommands:
+  Config:
+    Enabled: true
+    Permissions:
+      - "Admin"
+  CreateGiveaway:
+    Enabled: true
+    Permissions:
+      - "Admin"
+  TicketManage:
+    Enabled: true
+    Permissions:
+      - "Admin"
+  Balance:
+    Enabled: true
+    Permissions:
+      - "everyone"
+  Work:
+    Enabled: true
+    Cooldown: "1h"
+    Permissions:
+      - "everyone"
+  Messages:
+    Enabled: true
+    Permissions:
+      - "everyone"
+
+# Custom Commands Configuration
+
+# Custom Commands are commands that are not predefined in the bot.
+# The custom command object must have the following properties:
+
+# [key: string]: The name of the command.
+#   Enabled: Indicates whether the command is enabled. <true|false>
+#   Permissions: The permissions required to use the command. Array<"userId"|"roleId"|"roleName"|"everyone">
+#   Cooldown: The cooldown period for the command. <"1h"|"1d">
+#   Response: The response of the command. <InteractionReplyOptions> (see discord.js documentation)
+
+CustomCommands:
+  Ping:
+    Enabled: true
+    Description: "Get the bot's ping."
+    Permissions:
+      - "everyone"
+    Response:
+      content: "{user-mention}"
+      embeds:
+        - title: "🏓 Pong!"
+          description: "Ping, pong! 🏓"
+          color: "Blue"
+      ephemeral: true # If true, the message will be ephemeral (only visible to the user who executed the command)

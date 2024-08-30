@@ -1,10 +1,11 @@
+import { commands, config, messages } from "@/utils/getConfigFiles";
 import { validateEmbedObject } from "@/utils/validateEmbedObject";
+import type { CommandType, RunOptions } from "@/types/Command";
 import { GiveawayManager } from "@/modules/GiveawayManager";
-import { config, messages } from "@/utils/getConfigFiles";
-import type { CommandType } from "@/types/Command";
 import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
 import { embedsKeys } from "@/types/Messages";
+import replaceAll from "@/utils/replaceAll";
 import type { DataSource } from "typeorm";
 import { join, sep } from "node:path";
 import Logger from "@/utils/Logger";
@@ -16,6 +17,11 @@ import { Guild } from "@/db/entity/Guild";
 import { User } from "@/db/entity/User";
 
 import {
+	commandNameToPascalCase,
+	commandNameToSnakeCase,
+} from "@/utils/parseCommandName";
+
+import {
 	Client,
 	GatewayIntentBits,
 	DiscordjsError,
@@ -24,13 +30,14 @@ import {
 	ButtonStyle,
 } from "discord.js";
 
-class Bot extends Client {
+class Bot extends Client<true> {
 	private _db: DataSource;
 
 	public logger = new Logger();
 	public commands: Collection<string, CommandType> = new Collection();
 	public giveawayManager: GiveawayManager;
 	public messages = messages;
+	public commandsFile = commands;
 	public config = config;
 
 	public db = {
@@ -67,37 +74,74 @@ class Bot extends Client {
 		this.giveawayManager = new GiveawayManager(this);
 	}
 
+	private async loadCustomCommands() {
+		const commands = this.commandsFile.CustomCommands;
+
+		for (const [name, command] of Object.entries(commands)) {
+			if (!command.Enabled) continue;
+			const commandName = commandNameToSnakeCase(name);
+
+			const payload: CommandType = {
+				name: commandName,
+				description: command.Description,
+				permission: command.Permissions,
+				directory: "custom",
+				run: async ({ interaction }: RunOptions) => {
+					const response = replaceAll(command.Response, {
+						"{user-mention}": interaction.user.toString(),
+						"{user-id}": interaction.user.id,
+						"{user-tag}": interaction.user.tag,
+						"{user-avatar}": interaction.user.displayAvatarURL(),
+					});
+
+					await interaction.reply(response);
+				},
+			};
+
+			this.logger.info(`Loaded Custom Command (${name})`);
+			this.commands.set(commandName, payload);
+		}
+	}
+
 	private async loadCommands() {
 		const guild = this.guilds.cache.first();
-		const commandFiles = await glob(
-			join(__dirname, "..", "commands", "**/*{.js,ts}").replace(/\\/g, "/"),
-		);
-
-		for await (const filePath of commandFiles) {
-			const command: CommandType = (await import(filePath))?.default;
-
-			const splitted = filePath.split(sep);
-			const directory = splitted[splitted.length - 2];
-
-			if (!command || !command.name) {
-				this.logger.error(
-					`There was an error loading the command (${splitted[splitted.length - 1]})`,
-				);
-				continue;
-			}
-
-			this.commands.set(command.name, {
-				...command,
-				directory,
-			});
-		}
-
 		if (!guild) {
 			this.logger.error("No guild found");
 			return process.exit(1);
 		}
 
-		if (this.commands.size !== (await guild.commands.fetch()).size) {
+		const commandFiles = await glob(
+			join(__dirname, "..", "commands", "**/*{.js,ts}").replace(/\\/g, "/"),
+		);
+
+		const commandsToLoad = [];
+		for (const filePath of commandFiles) {
+			const command: CommandType = (await import(filePath))?.default;
+			const directory = filePath.split(sep).slice(-2, -1)[0];
+
+			if (!command || !command.name) {
+				this.logger.error(
+					`There was an error loading the command (${filePath.split(sep).pop()})`,
+				);
+				continue;
+			}
+
+			const display = commandNameToPascalCase(command.name);
+			const commandFile = this.commandsFile.BotCommands[display];
+
+			commandsToLoad.push({
+				...command,
+				directory,
+				permission: commandFile?.Permissions || [],
+			});
+		}
+
+		for (const command of commandsToLoad) {
+			this.commands.set(command.name, command);
+		}
+
+		const guildCommands = await guild.commands.fetch();
+		if (this.commands.size !== guildCommands.size) {
 			this.logger.info("Updating commands on the server...");
 			await guild.commands.set(this.commands.toJSON());
 		}
@@ -133,6 +177,7 @@ class Bot extends Client {
 		await this.initializeDatabase();
 		await this.giveawayManager.startGiveawayInterval();
 
+		await this.loadCustomCommands();
 		await this.loadCommands();
 		await this.loadEvents();
 	}

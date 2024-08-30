@@ -1,4 +1,5 @@
 import type { MessagesFile } from "@/types/Messages";
+import type { CommandsFile } from "@/types/Command";
 import type { ConfigFile } from "@/types/Config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -11,3 +12,7 @@ export const messages = load(
 export const config = load(
 	readFileSync(join(process.cwd(), "config", "config.yml"), "utf8"),
 ) as ConfigFile;
+
+export const commands = load(
+	readFileSync(join(process.cwd(), "config", "commands.yml"), "utf8"),
+) as CommandsFile;

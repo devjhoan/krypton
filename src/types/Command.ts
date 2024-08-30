@@ -5,6 +5,7 @@ import type {
 	ChatInputCommandInteraction,
 	Guild,
 	GuildMember,
+	InteractionReplyOptions,
 	TextChannel,
 } from "discord.js";
 
@@ -26,6 +27,22 @@ export interface RunOptions {
 
 export type CommandType = {
 	run: (options: RunOptions) => unknown;
-	permission?: string;
+	permission?: Array<string>;
 	directory?: string;
 } & ChatInputApplicationCommandData;
+
+export interface CommandsFile {
+	BotCommands: Record<string, FileCommand>;
+	CustomCommands: Record<string, CustomCommand>;
+}
+
+interface FileCommand {
+	Enabled: boolean;
+	Permissions: Array<string>;
+	Cooldown: string;
+}
+
+interface CustomCommand extends FileCommand {
+	Response: InteractionReplyOptions;
+	Description: string;
+}
