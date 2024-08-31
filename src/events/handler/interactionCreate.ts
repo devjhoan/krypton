@@ -1,7 +1,9 @@
-import { Events, type PermissionResolvable } from "discord.js";
 import type { CommandType, ExtendedInteraction } from "@/types/Command";
+import { Events, type PermissionResolvable } from "discord.js";
 import { Event } from "@/structures/Event";
 import bot from "@/index";
+import ms from "ms";
+import replaceAll from "@/utils/replaceAll";
 
 export default new Event(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
@@ -16,6 +18,8 @@ export default new Event(Events.InteractionCreate, async (interaction) => {
 			ephemeral: true,
 		});
 	}
+
+	if (hasCooldown(interaction as ExtendedInteraction, command)) return;
 
 	try {
 		await command.run({
@@ -38,7 +42,6 @@ function hasPermission(interaction: ExtendedInteraction, command: CommandType) {
 	if (!command.permission) return false;
 	const member = interaction.member;
 
-	console.log(`${command.name}: ${command.permission}`);
 	if (command.permission.includes("everyone")) return true;
 	return command.permission.some((permission) => {
 		return (
@@ -50,4 +53,36 @@ function hasPermission(interaction: ExtendedInteraction, command: CommandType) {
 			member.permissions.has(permission as PermissionResolvable)
 		);
 	});
+}
+
+function hasCooldown(interaction: ExtendedInteraction, command: CommandType) {
+	if (!command.cooldown) return false;
+
+	const cooldownQuery = `${interaction.user.id}-${command.name}`;
+	const userCooldown = bot.cooldowns.get(cooldownQuery) || 0;
+	const cooldownTime = command.cooldown ? ms(command.cooldown) : 0;
+	const timeLeft = userCooldown - Date.now();
+
+	if (timeLeft > 0) {
+		return interaction.reply({
+			ephemeral: true,
+			embeds: [
+				replaceAll(bot.messages.Embeds.UserInCooldownEmbed, {
+					"{user-username}": interaction.user.username,
+					"{user-avatar}": interaction.user.displayAvatarURL(),
+					"{time}": `${Math.floor(userCooldown / 1000)}`,
+				}),
+			],
+		});
+	}
+
+	if (cooldownTime > 0) {
+		bot.cooldowns.set(cooldownQuery, Date.now() + cooldownTime);
+
+		setTimeout(() => {
+			bot.cooldowns.delete(cooldownQuery);
+		}, cooldownTime);
+	}
+
+	return false;
 }

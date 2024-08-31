@@ -35,6 +35,7 @@ class Bot extends Client<true> {
 
 	public logger = new Logger();
 	public commands: Collection<string, CommandType> = new Collection();
+	public cooldowns: Collection<string, number> = new Collection();
 	public giveawayManager: GiveawayManager;
 	public messages = messages;
 	public commandsFile = commands;
@@ -114,7 +115,7 @@ class Bot extends Client<true> {
 			join(__dirname, "..", "commands", "**/*{.js,ts}").replace(/\\/g, "/"),
 		);
 
-		const commandsToLoad = [];
+		const commandsToLoad: Array<CommandType> = [];
 		for (const filePath of commandFiles) {
 			const command: CommandType = (await import(filePath))?.default;
 			const directory = filePath.split(sep).slice(-2, -1)[0];
@@ -133,6 +134,7 @@ class Bot extends Client<true> {
 				...command,
 				directory,
 				permission: commandFile?.Permissions || [],
+				cooldown: commandFile?.Cooldown || undefined,
 			});
 		}
 
