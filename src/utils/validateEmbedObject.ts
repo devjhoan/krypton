@@ -4,14 +4,15 @@ interface OwnApiEmbed extends Omit<APIEmbed, "color"> {
 	color?: number | string;
 }
 
+const isString = (value: unknown) => typeof value === "string";
+const isObject = (value: unknown) => value && typeof value === "object";
+
 /**
- * Validate if a embed object is valid or not
+ * Validate if an embed object is valid or not
  * @param embed - The embed object to validate
  * @returns The validation result
  */
 export function validateEmbedObject(embed: Partial<OwnApiEmbed>) {
-	// TODO: This code need to be improved, this is just a proof of concept
-
 	if (!embed || typeof embed !== "object") {
 		return {
 			valid: false,
@@ -20,28 +21,97 @@ export function validateEmbedObject(embed: Partial<OwnApiEmbed>) {
 		};
 	}
 
-	if (embed.title && typeof embed.title !== "string") {
-		return {
-			valid: false,
+	const validations = [
+		{
 			key: "title",
+			value: embed.title,
+			typeCheck: isString,
 			message: "The title must be a string",
-		};
-	}
-
-	if (embed.description && typeof embed.description !== "string") {
-		return {
-			valid: false,
+		},
+		{
 			key: "description",
+			value: embed.description,
+			typeCheck: isString,
 			message: "The description must be a string",
-		};
-	}
-
-	if (embed.color && typeof embed.color !== "string") {
-		return {
-			valid: false,
+		},
+		{
 			key: "color",
+			value: embed.color,
+			typeCheck: isString,
 			message: "The color must be a valid color string",
-		};
+		},
+		{
+			key: "footer",
+			value: embed.footer,
+			typeCheck: isObject,
+			message: "The footer must be an object",
+		},
+		{
+			key: "footer.text",
+			value: embed.footer?.text,
+			typeCheck: isString,
+			message: "The footer text must be a string",
+		},
+		{
+			key: "footer.icon_url",
+			value: embed.footer?.icon_url,
+			typeCheck: isString,
+			message: "The footer icon url must be a string",
+		},
+		{
+			key: "image",
+			value: embed.image,
+			typeCheck: isObject,
+			message: "The image must be an object",
+		},
+		{
+			key: "image.url",
+			value: embed.image?.url,
+			typeCheck: isString,
+			message: "The image url must be a string",
+		},
+		{
+			key: "thumbnail",
+			value: embed.thumbnail,
+			typeCheck: isObject,
+			message: "The thumbnail must be an object",
+		},
+		{
+			key: "thumbnail.url",
+			value: embed.thumbnail?.url,
+			typeCheck: isString,
+			message: "The thumbnail url must be a string",
+		},
+		{
+			key: "author",
+			value: embed.author,
+			typeCheck: isObject,
+			message: "The author must be an object",
+		},
+		{
+			key: "author.name",
+			value: embed.author?.name,
+			typeCheck: isString,
+			message: "The author name must be a string",
+		},
+		{
+			key: "author.url",
+			value: embed.author?.url,
+			typeCheck: isString,
+			message: "The author url must be a string",
+		},
+		{
+			key: "author.icon_url",
+			value: embed.author?.icon_url,
+			typeCheck: isString,
+			message: "The author icon url must be a string",
+		},
+	];
+
+	for (const { key, value, typeCheck, message } of validations) {
+		if (value !== undefined && !typeCheck(value)) {
+			return { valid: false, key, message };
+		}
 	}
 
 	if (
@@ -56,97 +126,5 @@ export function validateEmbedObject(embed: Partial<OwnApiEmbed>) {
 		};
 	}
 
-	if (embed.footer && typeof embed.footer !== "object") {
-		return {
-			valid: false,
-			key: "footer",
-			message: "The footer must be an object",
-		};
-	}
-
-	if (embed.footer?.text && typeof embed.footer.text !== "string") {
-		return {
-			valid: false,
-			key: "footer.text",
-			message: "The footer text must be a string",
-		};
-	}
-
-	if (embed.footer?.icon_url && typeof embed.footer.icon_url !== "string") {
-		return {
-			valid: false,
-			key: "footer.icon_url",
-			message: "The footer icon url must be a string",
-		};
-	}
-
-	if (embed.image && typeof embed.image !== "object") {
-		return {
-			valid: false,
-			key: "image",
-			message: "The image must be an object",
-		};
-	}
-
-	if (embed.image?.url && typeof embed.image.url !== "string") {
-		return {
-			valid: false,
-			key: "image.url",
-			message: "The image url must be a string",
-		};
-	}
-
-	if (embed.thumbnail && typeof embed.thumbnail !== "object") {
-		return {
-			valid: false,
-			key: "thumbnail",
-			message: "The thumbnail must be an object",
-		};
-	}
-
-	if (embed.thumbnail?.url && typeof embed.thumbnail.url !== "string") {
-		return {
-			valid: false,
-			key: "thumbnail.url",
-			message: "The thumbnail url must be a string",
-		};
-	}
-
-	if (embed.author && typeof embed.author !== "object") {
-		return {
-			valid: false,
-			key: "author",
-			message: "The author must be an object",
-		};
-	}
-
-	if (embed.author?.name && typeof embed.author.name !== "string") {
-		return {
-			valid: false,
-			key: "author.name",
-			message: "The author name must be a string",
-		};
-	}
-
-	if (embed.author?.url && typeof embed.author.url !== "string") {
-		return {
-			valid: false,
-			key: "author.url",
-			message: "The author url must be a string",
-		};
-	}
-
-	if (embed.author?.icon_url && typeof embed.author.icon_url !== "string") {
-		return {
-			valid: false,
-			key: "author.icon_url",
-			message: "The author icon url must be a string",
-		};
-	}
-
-	return {
-		valid: true,
-		key: "",
-		message: "The embed object is valid",
-	};
+	return { valid: true, key: "", message: "The embed object is valid" };
 }
