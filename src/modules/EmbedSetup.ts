@@ -34,13 +34,20 @@ export enum QuestionType {
 	Button = "button",
 }
 
-interface SetupQuestion<Key extends string, Type extends QuestionType> {
+interface BaseSetupQuestion<Key extends string, Type extends QuestionType> {
 	label: string;
 	emoji: string;
 	type: Type;
 	key: Key;
 	readonly?: boolean;
-	selects?: Array<{
+}
+
+interface SelectSetupQuestion<Key extends string>
+	extends BaseSetupQuestion<
+		Key,
+		QuestionType.Select | QuestionType.MultiSelect
+	> {
+	selects: Array<{
 		label: string;
 		value: string;
 		emoji: string;
@@ -48,27 +55,27 @@ interface SetupQuestion<Key extends string, Type extends QuestionType> {
 	}>;
 }
 
-type QuestionValueType<T extends QuestionType> = T extends QuestionType.Text
-	? string
-	: T extends QuestionType.Number
-		? number
-		: T extends QuestionType.Boolean
-			? boolean
-			: T extends QuestionType.Channel
-				? string
-				: T extends QuestionType.Category
-					? string
-					: T extends QuestionType.Button
-						? ButtonStyle
-						: T extends QuestionType.Roles
-							? Array<string>
-							: T extends QuestionType.MultiSelect
-								? Array<string>
-								: T extends QuestionType.Role
-									? string
-									: T extends QuestionType.Select
-										? string
-										: never;
+interface NonSelectSetupQuestion<Key extends string, Type extends QuestionType>
+	extends BaseSetupQuestion<Key, Type> {}
+
+type SetupQuestion<Key extends string, Type extends QuestionType> = Type extends
+	| QuestionType.Select
+	| QuestionType.MultiSelect
+	? SelectSetupQuestion<Key>
+	: NonSelectSetupQuestion<Key, Type>;
+
+type QuestionValueType<T extends QuestionType> = {
+	[QuestionType.Text]: string;
+	[QuestionType.Number]: number;
+	[QuestionType.Boolean]: boolean;
+	[QuestionType.Channel]: string;
+	[QuestionType.Category]: string;
+	[QuestionType.Button]: ButtonStyle;
+	[QuestionType.Roles]: Array<string>;
+	[QuestionType.MultiSelect]: Array<string>;
+	[QuestionType.Role]: string;
+	[QuestionType.Select]: string;
+}[T];
 
 type FinalJsonType<Q extends readonly SetupQuestion<string, QuestionType>[]> = {
 	[K in Q[number]["key"]]: QuestionValueType<
@@ -271,7 +278,12 @@ export class EmbedSetup<
 			return value;
 		}
 
-		const select = option.selects?.find((select) => select.value === value);
+		if (option.type === QuestionType.Select) {
+			const select = option.selects?.find((select) => select.value === value);
+			if (select) {
+				return `• ${select.emoji} ${select.label}`;
+			}
+		}
 
 		switch (option.type) {
 			case QuestionType.Category:
@@ -288,8 +300,6 @@ export class EmbedSetup<
 				return value ? "• Enabled" : "• Disabled";
 			case QuestionType.Roles:
 				return (value as Array<string>).map((role) => `<@&${role}>`).join("\n");
-			case QuestionType.Select:
-				return `• ${select ? `${select.emoji} ${select.label}` : "Not Set"}`;
 			case QuestionType.MultiSelect:
 				return (value as Array<string>).map((string) => `${string}`).join("\n");
 			case QuestionType.Button:
