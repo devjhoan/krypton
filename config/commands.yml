@@ -1,5 +1,5 @@
 # Commands Configuration File
-# 
+#
 # This file is used to configure the commands that the bot will use.
 # The command object needs to have the following properties:
 
@@ -52,6 +52,10 @@ BotCommands:
     Enabled: true
     Permissions:
       - "everyone"
+  CustomCommands:
+    Enabled: true
+    Permissions:
+      - "Admin"
 
 # Custom Commands Configuration
 
