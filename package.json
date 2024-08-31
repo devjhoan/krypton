@@ -8,10 +8,10 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun --hot run src/index.ts",
-    "format": "bunx biome format",
-    "lint": "bunx biome lint"
-  },
-  "dependencies": {
+		"format": "bunx biome format",
+		"lint": "bunx biome lint && bunx biome check"
+	},
+	"dependencies": {
     "discord-html-transcripts": "^3.2.0",
     "discord.js": "^14.15.3",
     "glob": "^11.0.0",
