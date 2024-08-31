@@ -1,5 +1,6 @@
 import type { ExtendedInteraction } from "@/types/Command";
 import type Bot from "@/structures/Client";
+import ms from "ms";
 
 import {
 	ActionRowBuilder,
@@ -19,7 +20,6 @@ import {
 	RoleSelectMenuInteraction,
 	ChannelType,
 } from "discord.js";
-import ms from "ms";
 
 export enum QuestionType {
 	Text = "text",
@@ -32,14 +32,15 @@ export enum QuestionType {
 	Select = "select",
 	MultiSelect = "multiSelect",
 	Button = "button",
+	SubQuestion = "subQuestion",
 }
 
 interface BaseSetupQuestion<Key extends string, Type extends QuestionType> {
+	readonly?: boolean;
 	label: string;
 	emoji: string;
 	type: Type;
 	key: Key;
-	readonly?: boolean;
 }
 
 interface SelectSetupQuestion<Key extends string>
@@ -58,13 +59,24 @@ interface SelectSetupQuestion<Key extends string>
 interface NonSelectSetupQuestion<Key extends string, Type extends QuestionType>
 	extends BaseSetupQuestion<Key, Type> {}
 
-type SetupQuestion<Key extends string, Type extends QuestionType> = Type extends
-	| QuestionType.Select
-	| QuestionType.MultiSelect
-	? SelectSetupQuestion<Key>
-	: NonSelectSetupQuestion<Key, Type>;
+interface SubSetupQuestion<Key extends string>
+	extends BaseSetupQuestion<Key, QuestionType.SubQuestion> {
+	questions: Array<SetupQuestion<string, QuestionType>>;
+}
 
-type QuestionValueType<T extends QuestionType> = {
+export type SetupQuestion<
+	Key extends string,
+	Type extends QuestionType,
+> = Type extends QuestionType.Select | QuestionType.MultiSelect
+	? SelectSetupQuestion<Key>
+	: Type extends QuestionType.SubQuestion
+		? SubSetupQuestion<Key>
+		: NonSelectSetupQuestion<Key, Type>;
+
+type QuestionValueType<
+	T extends QuestionType,
+	Q extends SetupQuestion<string, QuestionType>[] | undefined,
+> = {
 	[QuestionType.Text]: string;
 	[QuestionType.Number]: number;
 	[QuestionType.Boolean]: boolean;
@@ -75,11 +87,20 @@ type QuestionValueType<T extends QuestionType> = {
 	[QuestionType.MultiSelect]: Array<string>;
 	[QuestionType.Role]: string;
 	[QuestionType.Select]: string;
+	[QuestionType.SubQuestion]: Q extends SetupQuestion<string, QuestionType>[]
+		? FinalJsonType<Q>
+		: undefined;
 }[T];
 
 type FinalJsonType<Q extends readonly SetupQuestion<string, QuestionType>[]> = {
 	[K in Q[number]["key"]]: QuestionValueType<
-		Extract<Q[number], { key: K }>["type"]
+		Extract<Q[number], { key: K }>["type"],
+		Extract<Q[number], { key: K }> extends SubSetupQuestion<string>
+			? Extract<
+					Extract<Q[number], { key: K }>,
+					SubSetupQuestion<string>
+				>["questions"]
+			: []
 	>;
 };
 
@@ -88,11 +109,12 @@ interface EmbedSetupProps<
 > {
 	questions: Q;
 	title: string;
-	description?: string;
 	client: Bot;
+	description?: string;
 	value?: Partial<FinalJsonType<Q>>;
 	editReply?: boolean;
 	ephemeral?: boolean;
+	isSubQuestion?: boolean;
 }
 
 export class EmbedSetup<
@@ -100,6 +122,7 @@ export class EmbedSetup<
 > {
 	public finalJson: FinalJsonType<Q>;
 
+	private isSubQuestion: boolean;
 	private description?: string;
 	private editReply: boolean;
 	private ephemeral: boolean;
@@ -116,7 +139,9 @@ export class EmbedSetup<
 		value,
 		editReply = false,
 		ephemeral = false,
+		isSubQuestion = false,
 	}: EmbedSetupProps<Q>) {
+		this.isSubQuestion = isSubQuestion;
 		this.description = description;
 		this.editReply = editReply;
 		this.questions = questions;
@@ -143,7 +168,7 @@ export class EmbedSetup<
 
 					if (userOptionResponse !== undefined && userOptionResponse !== null) {
 						this.finalJson[this.questions[0].key as keyof FinalJsonType<Q>] =
-							userOptionResponse;
+							userOptionResponse as FinalJsonType<Q>[keyof FinalJsonType<Q>];
 					}
 
 					return resolve(this.finalJson);
@@ -172,7 +197,7 @@ export class EmbedSetup<
 						if (!question) return;
 
 						const userOptionResponse = await this.getUserOptionResponse(
-							question,
+							question as Extract<Q[number], { key: Q[number]["key"] }>,
 							i,
 						);
 
@@ -181,13 +206,19 @@ export class EmbedSetup<
 							userOptionResponse !== null
 						) {
 							this.finalJson[question.key as keyof FinalJsonType<Q>] =
-								userOptionResponse;
+								userOptionResponse as FinalJsonType<Q>[keyof FinalJsonType<Q>];
 						}
 
-						return await interaction.editReply({
+						const responsePayload = {
 							embeds: [this.getEmbedWithValues()],
 							components: this.getOptionsComponents(),
-						});
+						};
+
+						if (this.isSubQuestion) {
+							return await i.message.edit(responsePayload);
+						}
+
+						return await interaction.editReply(responsePayload);
 					}
 
 					if (i.isButton() && i.customId.endsWith("embed-setup-submit")) {
@@ -304,12 +335,33 @@ export class EmbedSetup<
 				return (value as Array<string>).map((string) => `${string}`).join("\n");
 			case QuestionType.Button:
 				return `• ${displayButtonStyle(value as ButtonStyle)}`;
+			case QuestionType.SubQuestion:
+				return "• Click to edit";
 			default:
 				return "• Not Set";
 		}
 	}
 
 	getOptionsComponents() {
+		const submitRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder()
+				.setEmoji("✅")
+				.setLabel("Submit")
+				.setStyle(ButtonStyle.Success)
+				.setDisabled(!this.isFinalJsonValid())
+				.setCustomId(`${this.panelId}-embed-setup-submit`),
+		);
+
+		if (this.isSubQuestion) {
+			submitRow.addComponents(
+				new ButtonBuilder()
+					.setEmoji("🔙")
+					.setLabel("Back")
+					.setStyle(ButtonStyle.Secondary)
+					.setCustomId(`${this.panelId}-xdembed-setup-submit`),
+			);
+		}
+
 		return [
 			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder()
@@ -325,14 +377,7 @@ export class EmbedSetup<
 							})),
 					),
 			),
-			new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setEmoji("✅")
-					.setLabel("Submit")
-					.setStyle(ButtonStyle.Success)
-					.setDisabled(!this.isFinalJsonValid())
-					.setCustomId(`${this.panelId}-embed-setup-submit`),
-			),
+			submitRow,
 		];
 	}
 
@@ -363,8 +408,12 @@ export class EmbedSetup<
 		option: SetupQuestion<string, QuestionType>,
 		baseInteraction: StringSelectMenuInteraction | ExtendedInteraction,
 	): Promise<
-		| QuestionValueType<Extract<Q[number], { key: Q[number]["key"] }>["type"]>
+		| string
+		| Array<string>
+		| boolean
+		| ButtonStyle
 		| null
+		| FinalJsonType<Q>
 		| undefined
 	> {
 		const interaction = baseInteraction;
@@ -436,9 +485,7 @@ export class EmbedSetup<
 			}
 
 			await modalSubmit.deferUpdate();
-			return value as QuestionValueType<
-				Extract<Q[number], { key: Q[number]["key"] }>["type"]
-			>;
+			return value;
 		}
 
 		if (
@@ -492,14 +539,10 @@ export class EmbedSetup<
 
 			await select.deferUpdate();
 			if (option.type === QuestionType.MultiSelect) {
-				return select.values as QuestionValueType<
-					Extract<Q[number], { key: Q[number]["key"] }>["type"]
-				>;
+				return select.values;
 			}
 
-			return select.values[0] as QuestionValueType<
-				Extract<Q[number], { key: Q[number]["key"] }>["type"]
-			>;
+			return select.values[0];
 		}
 
 		if (
@@ -545,9 +588,7 @@ export class EmbedSetup<
 
 			await channel.deferUpdate();
 			if (channel instanceof ChannelSelectMenuInteraction) {
-				return channel?.values[0] as QuestionValueType<
-					Extract<Q[number], { key: Q[number]["key"] }>["type"]
-				>;
+				return channel?.values[0];
 			}
 
 			return null;
@@ -592,14 +633,10 @@ export class EmbedSetup<
 			await role.deferUpdate();
 			if (role instanceof RoleSelectMenuInteraction) {
 				if (option.type === QuestionType.Roles) {
-					return role?.values as QuestionValueType<
-						Extract<Q[number], { key: Q[number]["key"] }>["type"]
-					>;
+					return role?.values;
 				}
 
-				return role?.values[0] as QuestionValueType<
-					Extract<Q[number], { key: Q[number]["key"] }>["type"]
-				>;
+				return role?.values[0];
 			}
 
 			return null;
@@ -647,9 +684,7 @@ export class EmbedSetup<
 				return null;
 			}
 
-			return (button?.customId === `${customId}-yes`) as QuestionValueType<
-				Extract<Q[number], { key: Q[number]["key"] }>["type"]
-			>;
+			return button?.customId === `${customId}-yes`;
 		}
 
 		if (option.type === QuestionType.Button) {
@@ -697,11 +732,28 @@ export class EmbedSetup<
 
 			const value = parseButtonStyle(
 				capitalize(button?.customId.replace(`${customId}-`, "")),
-			) as QuestionValueType<
-				Extract<Q[number], { key: Q[number]["key"] }>["type"]
-			>;
+			);
 
 			return value;
+		}
+
+		if (option.type === QuestionType.SubQuestion) {
+			const subQuestions = option.questions;
+			const questionSetup = new EmbedSetup({
+				client: this.bot,
+				questions: subQuestions,
+				title: option.label,
+				ephemeral: false,
+				editReply: true,
+				isSubQuestion: true,
+			});
+
+			const response = await questionSetup.run(
+				interaction as ExtendedInteraction,
+			);
+
+			if (!response) return null;
+			return response as FinalJsonType<Q>;
 		}
 	}
 }
