@@ -2,6 +2,7 @@ import { commands, config, messages } from "@/utils/getConfigFiles";
 import { validateEmbedObject } from "@/utils/validateEmbedObject";
 import type { CommandType, RunOptions } from "@/types/Command";
 import { GiveawayManager } from "@/modules/GiveawayManager";
+import { DatabaseHelper } from "@/utils/DatabaseHelper";
 import { AppDataSource } from "@/db/data-source";
 import type { Event } from "@/structures/Event";
 import { embedsKeys } from "@/types/Messages";
@@ -41,6 +42,7 @@ class Bot extends Client<true> {
 	public commandsFile = commands;
 	public config = config;
 
+	public dbHelper = new DatabaseHelper();
 	public db = {
 		guilds: AppDataSource.getRepository(Guild),
 		giveaways: AppDataSource.getRepository(Giveaway),
