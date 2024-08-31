@@ -88,6 +88,7 @@ class Bot extends Client<true> {
 				name: commandName,
 				description: command.Description,
 				permission: command.Permissions,
+				cooldown: command.Cooldown,
 				directory: "custom",
 				run: async ({ interaction }: RunOptions) => {
 					const response = replaceAll(command.Response, {
