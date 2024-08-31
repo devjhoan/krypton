@@ -13,6 +13,12 @@ export class User {
 	@Column("text")
 	guildId: string;
 
-	@Column("int")
-	messages: number;
+	@Column("int", { default: 0 })
+	messages = 0;
+
+	@Column("int", { default: 0 })
+	walletMoney = 0;
+
+	@Column("int", { default: 0 })
+	bankMoney = 0;
 }

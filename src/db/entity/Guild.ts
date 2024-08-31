@@ -3,6 +3,7 @@ import type { DotNotation, ValueOf } from "../types";
 import { Column, Entity, Unique } from "typeorm";
 
 import type {
+	EconomySettings,
 	TicketCategory,
 	TicketSettings,
 	WelcomeSettings,
@@ -58,6 +59,18 @@ export class Guild {
 		},
 	})
 	ticketCategories: Array<TicketCategory>;
+
+	@Column({
+		type: jsonType(),
+		default: defaultJsonify<EconomySettings>({
+			coinSymbol: "🪙",
+			maxWorkEarnings: 250,
+			minWorkEarnings: 50,
+			dailyReward: 1500,
+			weeklyReward: 7000,
+		}),
+	})
+	economySettings: EconomySettings;
 
 	getValueByString<K extends DotNotation<Guild>>(key: K): ValueOf<Guild, K> {
 		return key.split(".").reduce(

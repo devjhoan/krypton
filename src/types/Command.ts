@@ -28,6 +28,7 @@ export interface RunOptions {
 export type CommandType = {
 	run: (options: RunOptions) => unknown;
 	permission?: Array<string>;
+	cooldown?: string;
 	directory?: string;
 } & ChatInputApplicationCommandData;
 

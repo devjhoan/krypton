@@ -22,3 +22,11 @@ export interface WelcomeSettings {
 	enabled: boolean;
 	channel: string;
 }
+
+export interface EconomySettings {
+	coinSymbol: string;
+	maxWorkEarnings: number;
+	minWorkEarnings: number;
+	dailyReward: number;
+	weeklyReward: number;
+}

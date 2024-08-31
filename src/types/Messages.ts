@@ -22,6 +22,15 @@ export const embedsKeys = [
 	"TranscriptEmbed",
 	"TranscriptCreatedEmbed",
 	"UserJoinedEmbed",
+	"UserBalanceEmbed",
+	"EconomyWorkEmbed",
+	"NoPermissionEmbed",
+	"UserInCooldownEmbed",
+	"EconomyDailyEmbed",
+	"EconomyWeeklyEmbed",
+	"EconomyDepositEmbed",
+	"EconomyWithdrawEmbed",
+	"EconomyNotEnoughMoneyEmbed",
 ] as const;
 
 export const buttonsKeys = [
@@ -36,8 +45,8 @@ export const buttonsKeys = [
 
 export const stringsKeys = [
 	"GiveawayWinnerMessage",
-	"DefaultColor",
 	"TicketCategoryParsed",
+	"DefaultColor",
 ] as const;
 
 type EmbedKeys = (typeof embedsKeys)[number];

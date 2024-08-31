@@ -34,6 +34,24 @@ BotCommands:
     Enabled: true
     Permissions:
       - "everyone"
+  Daily:
+    Enabled: true
+    Cooldown: "1d"
+    Permissions:
+      - "everyone"
+  Weekly:
+    Enabled: true
+    Cooldown: "1w"
+    Permissions:
+      - "everyone"
+  Deposit:
+    Enabled: true
+    Permissions:
+      - "everyone"
+  Withdraw:
+    Enabled: true
+    Permissions:
+      - "everyone"
 
 # Custom Commands Configuration
 

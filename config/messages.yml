@@ -1,4 +1,15 @@
 Embeds:
+  NoPermissionEmbed:
+    title: "You can't use this command, beacuse you don't have permissions"
+    color: "{color-default}"
+  UserInCooldownEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: |
+      ⏰ Sorry **{user-username}** you are still in cooldown!
+      Time left: <t:{time}:R>
+    color: "Red"
   GiveawayCreated:
     title: "🎁 Giveaway"
     description: "{description}"
@@ -147,6 +158,54 @@ Embeds:
       • Joined At: <t:{joinedTimestamp}:R>
     thumbnail:
       url: "{user-avatar}"
+  UserBalanceEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    color: "Red"
+    fields:
+      - name: "Cash:"
+        value: "{money} {wallet-money}"
+        inline: true
+      - name: "Bank:"
+        value: "{money} {bank-money}"
+        inline: true
+      - name: "Total:"
+        value: "{money} {total-money}"
+        inline: true
+  EconomyWorkEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: "💰 You worked in the server and earned {money} **{amount}**"
+    color: "{color-default}"
+  EconomyDailyEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: "💰 You claimed your daily reward of {money} **{amount}** coins"
+    color: "{color-default}"
+  EconomyWeeklyEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: "💰 You claimed your weekly reward of {money} **{amount}** coins"
+    color: "{color-default}"
+  EconomyDepositEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: "💰 You deposited {money} **{amount}** coins into your bank"
+    color: "{color-default}"
+  EconomyWithdrawEmbed:
+    author:
+      name: "{user-username}"
+      iconURL: "{user-avatar}"
+    description: "💰 You withdrew {money} **{amount}** coins from your bank"
+    color: "{color-default}"
+  EconomyNotEnoughMoneyEmbed:
+    title: "💰 You don't have enough money to make this transaction"
+    color: "Red"
 
 Buttons:
   GiveawayActiveButton:

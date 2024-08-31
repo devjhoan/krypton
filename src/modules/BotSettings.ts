@@ -151,6 +151,37 @@ const categories: Array<Category> = [
 			},
 		],
 	},
+	{
+		emoji: "💰",
+		label: "Economy",
+		options: [
+			{
+				label: "Coin Symbol",
+				option: ConfigOptionType.String,
+				databaseKey: "economySettings.coinSymbol",
+			},
+			{
+				label: "Max Work Earnings",
+				option: ConfigOptionType.Number,
+				databaseKey: "economySettings.maxWorkEarnings",
+			},
+			{
+				label: "Min Work Earnings",
+				option: ConfigOptionType.Number,
+				databaseKey: "economySettings.minWorkEarnings",
+			},
+			{
+				label: "Daily Reward",
+				option: ConfigOptionType.Number,
+				databaseKey: "economySettings.dailyReward",
+			},
+			{
+				label: "Weekly Reward",
+				option: ConfigOptionType.Number,
+				databaseKey: "economySettings.weeklyReward",
+			},
+		],
+	},
 ];
 
 export class BotSettings {
